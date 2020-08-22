@@ -6,7 +6,7 @@ from imutils.video import VideoStream
 import numpy as np
 import imutils
 import time
-import cv2
+import cv2#this is for preprocessing
 import os
 
 def detect_and_predict_mask(frame, faceNet, maskNet):
@@ -74,21 +74,31 @@ def detect_and_predict_mask(frame, faceNet, maskNet):
 # load our serialized face detector model from disk
 prototxtPath = r"face_detector\deploy.prototxt"
 weightsPath = r"face_detector\res10_300x300_ssd_iter_140000.caffemodel"
-faceNet = cv2.dnn.readNet(prototxtPath, weightsPath)
+faceNet = cv2.dnn.readNet(prototxtPath, weightsPath)#pass 2 the weight in caffemodel and proto txt in the position of input "model" 
 
 # load the face mask detector model from disk
+#this is darknet model that had been trained
 maskNet = load_model("mask_detector.model")
 
 # initialize the video stream
 print("[INFO] starting video stream...")
-vs = VideoStream(src=0).start()
+#start the web camera / ip camera
+vs = VideoStream(src=0).start()#src = 0 from the camera source
+
+import ctypes
+user32 = ctypes.windll.user32
+screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+
 
 # loop over the frames from the video stream
-while True:
+#loop until the windows closed
+while True: #this is per frame loop
 	# grab the frame from the threaded video stream and resize it
 	# to have a maximum width of 400 pixels
-	frame = vs.read()
-	frame = imutils.resize(frame, width=400)
+	frame = vs.read()#get the frame
+	
+	#frame = imutils.resize(frame, width=1920)
+	frame = cv2.resize(frame, screensize) 
 
 	# detect faces in the frame and determine if they are wearing a
 	# face mask or not
@@ -115,6 +125,7 @@ while True:
 			cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 2)
 		cv2.rectangle(frame, (startX, startY), (endX, endY), color, 2)
 
+
 	# show the output frame
 	cv2.imshow("Frame", frame)
 	key = cv2.waitKey(1) & 0xFF
@@ -124,5 +135,5 @@ while True:
 		break
 
 # do a bit of cleanup
-cv2.destroyAllWindows()
+cv2.destroyAllWindows() #after that looping
 vs.stop()
