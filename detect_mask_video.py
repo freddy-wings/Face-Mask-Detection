@@ -136,9 +136,17 @@ while True: #this is per frame loop
 
 	if key == ord('s') and label!="Mask": 
 		cv2.imwrite(filename='saved_img.jpg', img=frame)
-		print("Image Saved")
-		print("Program End")
-		print(len(locs))
+		
+		for (box, pred) in zip(locs, preds): 
+			print(box)
+			(startX, startY, endX, endY) = box
+			roi = frame[startY:endY, startX:endX]
+			cv2.imwrite(filename='croped_boxed.jpg', img=roi)
 
+		#print("Image Saved")
+		#print("Program End")
+		#print(len(locs))
+		
+    			
 # do a bit of cleanup
 cv2.destroyAllWindows() #after that looping
