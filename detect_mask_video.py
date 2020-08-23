@@ -83,8 +83,8 @@ maskNet = load_model("mask_detector.model")
 # initialize the video stream
 print("[INFO] starting video stream...")
 #start the web camera / ip camera
-vs = VideoStream(src=0).start()#src = 0 from the camera source
-
+#vs = VideoStream(src=0).start()#src = 0 from the camera source
+vs = cv2.VideoCapture(0)
 import ctypes
 user32 = ctypes.windll.user32
 screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
@@ -92,10 +92,11 @@ screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
 
 # loop over the frames from the video stream
 #loop until the windows closed
+counter = 0
 while True: #this is per frame loop
 	# grab the frame from the threaded video stream and resize it
 	# to have a maximum width of 400 pixels
-	frame = vs.read()#get the frame
+	ret, frame = vs.read()#get the frame
 	
 	#frame = imutils.resize(frame, width=1920)
 	frame = cv2.resize(frame, screensize) 
@@ -109,7 +110,7 @@ while True: #this is per frame loop
 	for (box, pred) in zip(locs, preds):
 		# unpack the bounding box and predictions
 		(startX, startY, endX, endY) = box
-		(mask, withoutMask) = pred
+		(mask, withoutMask) = pred #assign the value of prediction
 
 		# determine the class label and color we'll use to draw
 		# the bounding box and text
@@ -121,19 +122,23 @@ while True: #this is per frame loop
 
 		# display the label and bounding box rectangle on the output
 		# frame
-		cv2.putText(frame, label, (startX, startY - 10),
-			cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 2)
+		cv2.putText(frame, label, (startX, startY - 10),cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 2)
 		cv2.rectangle(frame, (startX, startY), (endX, endY), color, 2)
-
+        #cv2.imwrite("captured",frame)
 
 	# show the output frame
 	cv2.imshow("Frame", frame)
 	key = cv2.waitKey(1) & 0xFF
-
+			
 	# if the `q` key was pressed, break from the loop
 	if key == ord("q"):
 		break
 
+	if key == ord('s') and label!="Mask": 
+		cv2.imwrite(filename='saved_img.jpg', img=frame)
+		print("Image Saved")
+		print("Program End")
+		print(len(locs))
+
 # do a bit of cleanup
 cv2.destroyAllWindows() #after that looping
-vs.stop()
